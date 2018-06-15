@@ -35,11 +35,13 @@
   state)
 
 (defun brainfuck--set (state new-value)
-  (print (format "Setting %s to %s" state new-value))
   (setcar (nthcdr (bfindex)
                   (bfmemory))
           new-value)
   state)
+
+(defun brainfuck--get (state)
+  (nth (bfindex) (bfmemory)))
 
 (defun brainfuck--add (state value)
   (brainfuck--set state
@@ -54,11 +56,10 @@
   (brainfuck--add state 1))
 
 (defun brainfuck--output (state)
-  
-  )
+  (print (char-to-string (brainfuck--get state))))
 
 (defun brainfuck--input (state)
-  )
+  (brainfuck--set state (string-to-char (read-input "value: "))))
 
 (defun brainfuck--eval (next-char state)
   (cond 
@@ -66,8 +67,8 @@
     ((equal next-char "<") (brainfuck--left state))
     ((equal next-char "+") (brainfuck--plus state))
     ((equal next-char "-") (brainfuck--minus state))
-    ((equal next-char ".") (print "output"))
-    ((equal next-char ",") (print "input"))
+    ((equal next-char ".") (brainfuck--output state))
+    ((equal next-char ",") (brainfuck--input state))
     ((equal next-char "[") (print "cond-start"))
     ((equal next-char "]") (print "cond-end"))
     (t (print "missed!"))))
