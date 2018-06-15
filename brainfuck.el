@@ -3,6 +3,14 @@
 ;; [ while(*ptr) {
 ;; ] }
 
+(defmacro bfmemory ()
+  "Totally unhygienic macro to get the memory"
+  `(nth 1 state))
+
+(defmacro bfindex ()
+  "Totally unhygienic macro to get the memory"
+  `(car state))
+
 (defun brainfuck--read-char ()
   (let ((next-char (char-after)))
     (goto-char (+ 1 (point)))
@@ -11,16 +19,16 @@
       nil)))
 
 (defun brainfuck--right (state)
-  (let ((index (car state))
-        (memory (nth 1 state)))
-    (if (>= index (length memory))
-        (setq memory (append memory '(0))))
+  (let ((index (bfindex))
+        (memory (bfmemory)))
+    (if (= (+ index 1) (length memory))
+        (setq memory (append memory (list 0))))
     (setcar state (+ index 1))
     (setcar (nthcdr 1 state) memory))
   state)
 
 (defun brainfuck--left (state)
-  (let ((index (car state)))
+  (let ((index (bfindex)))
     (if (= index 0)
         (error "Invalid shift beyond 0")
       (setcar state (- index 1))))
@@ -28,16 +36,15 @@
 
 (defun brainfuck--set (state new-value)
   (print (format "Setting %s to %s" state new-value))
-  (setcar (nthcdr (car state)
-                  (nth 1 state))
+  (setcar (nthcdr (bfindex)
+                  (bfmemory))
           new-value)
   state)
 
-;;; TODO: this code is unreadable…
 (defun brainfuck--add (state value)
   (brainfuck--set state
-                  (+ (nth (car state)
-                          (nth 1 state))
+                  (+ (nth (bfindex)
+                          (bfmemory))
                      value)))
 
 (defun brainfuck--minus (state)
@@ -47,6 +54,7 @@
   (brainfuck--add state 1))
 
 (defun brainfuck--output (state)
+  
   )
 
 (defun brainfuck--input (state)
@@ -76,3 +84,6 @@
       (brainfuck--eval next-char state)
       (setq next-char (brainfuck--read-char)))
     state))
+
+(fmakunbound 'bfmemory)
+(fmakunbound 'bfindex)
