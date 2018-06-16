@@ -61,6 +61,16 @@
 (defun brainfuck--input (state)
   (brainfuck--set state (string-to-char (read-input "value: "))))
 
+(defun brainfuck--matching-parenthesis ()
+  (goto-char (- point 1))
+  )
+
+(defun brainfuck--cond (state)
+  (if (not (zerop (brainfuck--get state)))
+      (brainfuck--goto-matching-parenthesis)
+      )
+  state)
+
 (defun brainfuck--eval (next-char state)
   (cond 
     ((equal next-char ">") (brainfuck--right state))
@@ -69,8 +79,8 @@
     ((equal next-char "-") (brainfuck--minus state))
     ((equal next-char ".") (brainfuck--output state))
     ((equal next-char ",") (brainfuck--input state))
-    ((equal next-char "[") (print "cond-start"))
-    ((equal next-char "]") (print "cond-end"))
+    ((equal next-char "[") state)
+    ((equal next-char "]") (brainfuck--cond state))
     (t (print "missed!"))))
 
 (defun brainfuck--empty-state ()
