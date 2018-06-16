@@ -13,8 +13,15 @@
   "Totally unhygienic macro to get the memory"
   `(car state))
 
+(defun brainfuck--mark-next ()
+  "Mark th next char, while cleaning all other highlights"
+  (remove-text-properties (point-min) (point-max) '(font-lock-face))
+  (let ((here (point)))
+      (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face font-lock-warning-face)))
+
 (defun brainfuck--read-char ()
   (let ((next-char (char-after)))
+    (brainfuck--mark-next)
     (goto-char (+ 1 (point)))
     (if next-char
         (char-to-string next-char)
