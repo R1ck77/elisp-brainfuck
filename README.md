@@ -6,7 +6,19 @@ This is mostly an exercise to refresh my elisp knowledge so don't expect much fr
 
 ### Status
 
-I'm finishing the operators (yeah, I know it's like 10 lines of C to do it, but did I mention I'm very lame with emacs lisp?), then if the project is entertaining enough, I'll consider adding a major mode with a visual memory debugger.
+The operators should (kind of) work, and if the project is entertaining enough, I'll consider adding a major mode with a visual memory debugger.
+
+There is some interactive highlighting: when the program run the code is highlighted as it's interpreted.
+
+You can set the speed of the interpreter with the variable `brainfuck-interpret-delay`.
+
+This code:
+
+    (setq brainfuck-interpret-delay 0.5)
+    
+will slow the interpret to a symbol evaluation every ½ second.
+
+Characters that are outside the range `+-><[].,` are ignored, which is neat for commenting the code (and God knows if you'll need to…).
 
 ### How to use it
 
