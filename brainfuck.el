@@ -1,8 +1,3 @@
-;; . putchar(*ptr)
-;; , *ptr = getchar()
-;; [ while(*ptr) {
-;; ] }
-
 (defvar brainfuck-interpret-delay 0.05)
 
 (defmacro bfmemory ()
