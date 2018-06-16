@@ -87,17 +87,21 @@
   state)
 
 (defun brainfuck--eval (next-char state)
-  (cond 
-    ((equal next-char ">") (brainfuck--right state))
-    ((equal next-char "<") (brainfuck--left state))
-    ((equal next-char "+") (brainfuck--plus state))
-    ((equal next-char "-") (brainfuck--minus state))
-    ((equal next-char ".") (brainfuck--output state))
-    ((equal next-char ",") (brainfuck--input state))
-    ((equal next-char "[") state)
-    ((equal next-char "]") (brainfuck--cond state))
-    (t (print "missed!")))
-  (sit-for brainfuck-interpret-delay)
+  (let ((is-valid-char t))
+    (cond 
+     ((equal next-char ">") (brainfuck--right state))
+     ((equal next-char "<") (brainfuck--left state))
+     ((equal next-char "+") (brainfuck--plus state))
+     ((equal next-char "-") (brainfuck--minus state))
+     ((equal next-char ".") (brainfuck--output state))
+     ((equal next-char ",") (brainfuck--input state))
+     ((equal next-char "[") state)
+     ((equal next-char "]") (brainfuck--cond state))
+     (t (progn
+          (setq is-valid-char nil)
+          state)))
+    (if is-valid-char
+        (sit-for brainfuck-interpret-delay)))
   state)
 
 (defun brainfuck--empty-state ()
