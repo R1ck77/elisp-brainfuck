@@ -17,7 +17,7 @@
   "Mark th next char, while cleaning all other highlights"
   (remove-text-properties (point-min) (point-max) '(font-lock-face))
   (let ((here (point)))
-      (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face font-lock-warning-face)))
+    (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face font-lock-warning-face)))
 
 (defun brainfuck--read-char ()
   (let ((next-char (char-after)))
@@ -120,8 +120,11 @@
   (let ((state (brainfuck--empty-state))
         (next-char (brainfuck--read-char)))
     (while next-char
-      (brainfuck--eval next-char state)
-      (setq next-char (brainfuck--read-char)))
+      (let ((here (point)))
+        (goto-char (point-min))
+        (brainfuck--eval next-char state)
+        (goto-char here)
+        (setq next-char (brainfuck--read-char))))
     state))
 
 (fmakunbound 'bfmemory)
