@@ -3,6 +3,8 @@
 ;; [ while(*ptr) {
 ;; ] }
 
+(defvar brainfuck-interpret-delay 0.05)
+
 (defmacro bfmemory ()
   "Totally unhygienic macro to get the memory"
   `(nth 1 state))
@@ -61,14 +63,27 @@
 (defun brainfuck--input (state)
   (brainfuck--set state (string-to-char (read-input "value: "))))
 
-(defun brainfuck--matching-parenthesis ()
-  (goto-char (- point 1))
-  )
+(defun brainfuck--read-backward ()
+  (backward-char)
+  (char-after))
+
+(defun brainfuck--char-to-score (char)
+  (cond
+   ((= char ?\[) 1)
+   ((= char ?\]) -1)
+   (t 0)))
+
+(defun brainfuck--backward-until-balanced ()
+  (let ((score (brainfuck--char-to-score
+                (brainfuck--read-backward))))
+    (while (/= score 0)
+      (let ((new-char (brainfuck--read-backward)))
+              (setq score (+ score
+                     (brainfuck--char-to-score new-char)))))))
 
 (defun brainfuck--cond (state)
   (if (not (zerop (brainfuck--get state)))
-      (brainfuck--goto-matching-parenthesis)
-      )
+      (brainfuck--backward-until-balanced))
   state)
 
 (defun brainfuck--eval (next-char state)
@@ -81,7 +96,9 @@
     ((equal next-char ",") (brainfuck--input state))
     ((equal next-char "[") state)
     ((equal next-char "]") (brainfuck--cond state))
-    (t (print "missed!"))))
+    (t (print "missed!")))
+  (sit-for brainfuck-interpret-delay)
+  state)
 
 (defun brainfuck--empty-state ()
   (list 0 (list 0)))
