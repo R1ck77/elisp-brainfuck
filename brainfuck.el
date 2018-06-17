@@ -1,8 +1,25 @@
+;;; eval
+;;;    (setq load-path (cons (file-name-directory (buffer-file-name)) load-path))
+;;; before this module to add this directory to the emacs load path
+
 (defvar brainfuck-mode-hook nil
   "*List of functions to call when entering brainfuck mode")
 
 (defvar brainfuck-interpret-delay 0.1
   "*Delay between brainfuck symbols evaluation")
+
+(defvar brainfuck--memory-buffer nil
+  "Memory buffer to hold the buffer evaluation")
+(make-variable-buffer-local 'brainfuck--memory-buffer)
+
+;;; Hook utility function
+(defun brainfuck-find-file-hook ()
+  "Brainfuck mode for .bf files"
+  (when (string= "bf" (file-name-extension (buffer-name)))
+    (brainfuck-mode)))
+
+(add-hook 'find-file-hook 'brainfuck-find-file-hook)
+
 
 (defmacro bfmemory ()
   "Totally unhygienic macro to get the memory"
