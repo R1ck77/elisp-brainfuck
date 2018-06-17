@@ -105,9 +105,12 @@
      ((equal next-char "]") (brainfuck--cond state))
      (t (progn
           (setq is-valid-char nil)
-          state)))
+          state)))    
     (if is-valid-char
-        (sit-for brainfuck-interpret-delay)))
+      (let ((here (point)))
+        (goto-char (point-min))
+        (sit-for brainfuck-interpret-delay)        
+        (goto-char here))))
   state)
 
 (defun brainfuck--empty-state ()
@@ -119,11 +122,8 @@
   (let ((state (brainfuck--empty-state))
         (next-char (brainfuck--read-char)))
     (while next-char
-      (let ((here (point)))
-        (goto-char (point-min))
-        (brainfuck--eval next-char state)
-        (goto-char here)
-        (setq next-char (brainfuck--read-char))))
+      (brainfuck--eval next-char state)
+      (setq next-char (brainfuck--read-char)))
     state))
 
 (fmakunbound 'bfmemory)
