@@ -73,6 +73,10 @@
   (backward-char)
   (char-after))
 
+(defun brainfuck--read-forward ()
+  (forward-char)
+  (char-before))
+
 (defun brainfuck--char-to-score (char)
   (cond
    ((= char ?\[) 1)
@@ -85,9 +89,21 @@
     (while (/= score 0)
       (let ((new-char (brainfuck--read-backward)))
               (setq score (+ score
-                     (brainfuck--char-to-score new-char)))))))
+                             (brainfuck--char-to-score new-char)))))))
 
-(defun brainfuck--cond (state)
+(defun brainfuck--forward-until-balanced ()
+  (let ((score (brainfuck--char-to-score (char-before))))
+    (while (/= score 0)
+      (let ((new-char (brainfuck--read-forward)))
+        (setq score (+ score
+                       (brainfuck--char-to-score new-char)))))))
+
+(defun brainfuck--cond-forth (state)
+  (if (zerop (brainfuck--get state))
+      (brainfuck--forward-until-balanced))
+  state)
+
+(defun brainfuck--cond-back (state)
   (if (not (zerop (brainfuck--get state)))
       (brainfuck--backward-until-balanced))
   state)
@@ -101,8 +117,8 @@
      ((equal next-char "-") (brainfuck--minus state))
      ((equal next-char ".") (brainfuck--output state))
      ((equal next-char ",") (brainfuck--input state))
-     ((equal next-char "[") state)
-     ((equal next-char "]") (brainfuck--cond state))
+     ((equal next-char "[") (brainfuck--cond-forth state))
+     ((equal next-char "]") (brainfuck--cond-back state))
      (t (progn
           (setq is-valid-char nil)
           state)))    
