@@ -1,4 +1,8 @@
-(defvar brainfuck-interpret-delay 0.05)
+(defvar brainfuck-mode-hook nil
+  "*List of functions to call when entering brainfuck mode")
+
+(defvar brainfuck-interpret-delay 0.1
+  "*Delay between brainfuck symbols evaluation")
 
 (defmacro bfmemory ()
   "Totally unhygienic macro to get the memory"
@@ -124,3 +128,20 @@
 
 (fmakunbound 'bfmemory)
 (fmakunbound 'bfindex)
+
+(defvar brainfuck-mode-map nil
+  "Keymap for brainfuck major mode")
+(if brainfuck-mode-map
+    nil
+  (setq brainfuck-mode-map (copy-keymap text-mode-map))
+  (define-key brainfuck-mode-map "\C-x\C-e" 'brainfuck-interpret))
+
+(defun brainfuck-mode ()
+  (interactive)
+  (kill-all-local-variables)
+  (setq major-mode 'brainfuck-mode)
+  (use-local-map brainfuck-mode-map)
+  (setq mode-name "BrainFuck")
+  (run-hooks 'brainfuck-mode-hook))
+
+(provide 'brainfuck)
