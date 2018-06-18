@@ -84,8 +84,10 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--init ()
   (display-buffer)
-  (brainfuck--empty-state)
-)
+  (brainfuck--empty-state))
+
+(defun brainfuck--clear-line ()
+  )
 
 (defun brainfuck--set (new-value)
   ;;; TODO
