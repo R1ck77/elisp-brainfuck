@@ -2,17 +2,13 @@
 ;;;    (setq load-path (cons (file-name-directory (buffer-file-name)) load-path))
 ;;; before this module to add this directory to the emacs load path
 
-(require 'brainfuck-memory)
+(require 'brainfuck-list-memory)
 
 (defvar brainfuck-mode-hook nil
   "*List of functions to call when entering brainfuck mode")
 
 (defvar brainfuck-interpret-delay 0.1
   "*Delay between brainfuck symbols evaluation")
-
-(defvar brainfuck--memory-buffer nil
-  "Memory buffer to hold the buffer evaluation")
-(make-variable-buffer-local 'brainfuck--memory-buffer)
 
 ;;; Hook utility function
 (defun brainfuck-find-file-hook ()
@@ -21,15 +17,6 @@
     (brainfuck-mode)))
 
 (add-hook 'find-file-hook 'brainfuck-find-file-hook)
-
-
-(defmacro bfmemory ()
-  "Totally unhygienic macro to get the memory"
-  `(nth 1 state))
-
-(defmacro bfindex ()
-  "Totally unhygienic macro to get the memory"
-  `(car state))
 
 (defun brainfuck--mark-next ()
   "Mark th next char, while cleaning all other highlights"
@@ -45,48 +32,21 @@
         (char-to-string next-char)
       nil)))
 
-(defun brainfuck--right (state)
-  (let ((index (bfindex))
-        (memory (bfmemory)))
-    (if (= (+ index 1) (length memory))
-        (setq memory (append memory (list 0))))
-    (setcar state (+ index 1))
-    (setcar (nthcdr 1 state) memory))
-  state)
-
-(defun brainfuck--left (state)
-  (let ((index (bfindex)))
-    (if (= index 0)
-        (error "Invalid shift beyond 0")
-      (setcar state (- index 1))))
-  state)
-
-(defun brainfuck--set (state new-value)
-  (setcar (nthcdr (bfindex)
-                  (bfmemory))
-          new-value)
-  state)
-
-(defun brainfuck--get (state)
-  (nth (bfindex) (bfmemory)))
-
-(defun brainfuck--add (state value)
-  (brainfuck--set state
-                  (+ (nth (bfindex)
-                          (bfmemory))
+(defun brainfuck--add (value)
+  (brainfuck--set (+ (brainfuck--get)
                      value)))
 
-(defun brainfuck--minus (state)
-  (brainfuck--add state -1))
+(defun brainfuck--minus ()
+  (brainfuck--add -1))
 
-(defun brainfuck--plus (state)
-  (brainfuck--add state 1))
+(defun brainfuck--plus ()
+  (brainfuck--add 1))
 
-(defun brainfuck--output (state)
-  (print (char-to-string (brainfuck--get state))))
+(defun brainfuck--output ()
+  (print (char-to-string (brainfuck--get))))
 
-(defun brainfuck--input (state)
-  (brainfuck--set state (string-to-char (read-input "value: "))))
+(defun brainfuck--input ()
+  (brainfuck--set (string-to-char (read-input "value: "))))
 
 (defun brainfuck--read-backward ()
   (backward-char)
@@ -117,52 +77,42 @@
         (setq score (+ score
                        (brainfuck--char-to-score new-char)))))))
 
-(defun brainfuck--cond-forth (state)
-  (if (zerop (brainfuck--get state))
-      (brainfuck--forward-until-balanced))
-  state)
+(defun brainfuck--cond-forth ()
+  (if (zerop (brainfuck--get))
+      (brainfuck--forward-until-balanced)))
 
-(defun brainfuck--cond-back (state)
-  (if (not (zerop (brainfuck--get state)))
-      (brainfuck--backward-until-balanced))
-  state)
+(defun brainfuck--cond-back ()
+  (if (not (zerop (brainfuck--get)))
+      (brainfuck--backward-until-balanced)))
 
-(defun brainfuck--eval (next-char state)
+(defun brainfuck--eval (next-char)
   (let ((is-valid-char t))
     (cond 
-     ((equal next-char ">") (brainfuck--right state))
-     ((equal next-char "<") (brainfuck--left state))
-     ((equal next-char "+") (brainfuck--plus state))
-     ((equal next-char "-") (brainfuck--minus state))
-     ((equal next-char ".") (brainfuck--output state))
-     ((equal next-char ",") (brainfuck--input state))
-     ((equal next-char "[") (brainfuck--cond-forth state))
-     ((equal next-char "]") (brainfuck--cond-back state))
+     ((equal next-char ">") (brainfuck--right))
+     ((equal next-char "<") (brainfuck--left))
+     ((equal next-char "+") (brainfuck--plus))
+     ((equal next-char "-") (brainfuck--minus))
+     ((equal next-char ".") (brainfuck--output))
+     ((equal next-char ",") (brainfuck--input))
+     ((equal next-char "[") (brainfuck--cond-forth))
+     ((equal next-char "]") (brainfuck--cond-back))
      (t (progn
-          (setq is-valid-char nil)
-          state)))    
+          (setq is-valid-char nil))))    
     (if is-valid-char
       (let ((here (point)))
         (goto-char (point-min))
         (sit-for brainfuck-interpret-delay)        
-        (goto-char here))))
-  state)
-
-(defun brainfuck--empty-state ()
-  (list 0 (list 0)))
+        (goto-char here)))))
 
 (defun brainfuck-interpret ()
   "Interpret the code at point with a blank memory state"
   (interactive)
-  (let ((state (brainfuck--empty-state))
-        (next-char (brainfuck--read-char)))
+  (brainfuck--init)
+  (let ((next-char (brainfuck--read-char)))
     (while next-char
-      (brainfuck--eval next-char state)
+      (brainfuck--eval next-char)
       (setq next-char (brainfuck--read-char)))
-    state))
-
-(fmakunbound 'bfmemory)
-(fmakunbound 'bfindex)
+    (brainfuck--print-memory)))
 
 (defvar brainfuck-mode-map nil
   "Keymap for brainfuck major mode")
