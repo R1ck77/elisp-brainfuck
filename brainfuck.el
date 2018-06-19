@@ -2,7 +2,8 @@
 ;;;    (setq load-path (cons (file-name-directory (buffer-file-name)) load-path))
 ;;; before this module to add this directory to the emacs load path
 
-(require 'brainfuck-list-memory)
+;;; (require 'brainfuck-list-memory)
+(require 'brainfuck-buffer-memory)
 
 (defvar brainfuck-mode-hook nil
   "*List of functions to call when entering brainfuck mode")
