@@ -22,6 +22,21 @@
 (defconst brainfuck--line-regexp "0x\\([0-9af]+\\) \\([0-9]+\\)"
   "Regular expression complementing the address and value format strings")
 
+(defun brainfuck--get-line ()
+  (with-current-buffer brainfuck--memory-buffer
+    brainfuck--current-line-cache))
+
+(defun brainfuck--set-line (new-line)
+  (with-current-buffer brainfuck--memory-buffer
+    (setq brainfuck--current-line-cache new-line)))
+
+(defun brainfuck--set-value (new-value)
+  (with-current-buffer brainfuck--memory-buffer
+    (setq brainfuck--current-value-cache new-value)))
+
+(defun brainfuck--get-value ()
+  (with-current-buffer brainfuck--memory-buffer
+    brainfuck--current-value-cache))
 
 (defun brainfuck--memory-buffer-name (&optional index)
   "Get a name for a memory buffer"
@@ -73,8 +88,8 @@ that's not used already, returns the buffer"
   (brainfuck--insert-memory-address address)
   (brainfuck--insert-value value)
   (beginning-of-line)  
-  (setq brainfuck--current-line-cache address)
-  (setq brainfuck--current-value-cache value))
+  (brainfuck--set-line address)
+  (brainfuck--set-value value))
 
 (defun brainfuck--insert-first-line ()
   "Insert the first line in the buffer"
@@ -82,13 +97,13 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--empty-state ()
   (let ((buffer (brainfuck--create-empty-buffer)))
-    (with-current-buffer buffer
-      (brainfuck--insert-first-line))    
     (setq brainfuck--memory-buffer buffer)
-    (display-buffer buffer)))
+    (with-current-buffer brainfuck--memory-buffer
+      (setq brainfuck--memory-buffer buffer)
+      (brainfuck--insert-first-line))    
+    (display-buffer brainfuck--memory-buffer)))
 
 (defun brainfuck--init ()
-  (display-buffer brainfuck--memory-buffer)
   (brainfuck--empty-state))
 
 (defun brainfuck--clear-line ()
@@ -98,11 +113,11 @@ that's not used already, returns the buffer"
 (defun brainfuck--set (new-value)
   (with-current-buffer brainfuck--memory-buffer
     (brainfuck--clear-line)
-    (brainfuck--insert-line brainfuck--current-line-cache new-value))
-  (setq brainfuck--current-value-cache new-value))
+    (brainfuck--insert-line (brainfuck--get-line) new-value))
+  (brainfuck--set-value new-value))
 
 (defun brainfuck--get ()
-  brainfuck--current-value-cache)
+  (brainfuck--get-value))
 
 (defun brainfuck--right ()
 
@@ -118,8 +133,8 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--update-cache-with-line-content ()
   (let ((line-content (brainfuck--parse-line)))
-    (setq brainfuck--current-line-cache (nth 0 line-content))
-    (setq brainfuck--current-value-cache (nth 1 line-content))))
+    (brainfuck--set-line (nth 0 line-content))
+    (brainfuck--set-value (nth 1 line-content))))
 
 (defun brainfuck--previous-line ()
   (let ((result (forward-line -1)))
@@ -134,8 +149,7 @@ that's not used already, returns the buffer"
 (defmacro comment (&rest args))
 
 (defun brainfuck--print-memory ()
-  (comment do nothing)
-  )
+  (comment "do nothing"))
 
 (fmakunbound 'comment)
 
