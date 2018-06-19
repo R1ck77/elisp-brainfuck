@@ -19,6 +19,10 @@
 (defconst brainfuck--value-format "%d"
   "Format for the value")
 
+(defconst brainfuck--line-regexp "0x\\([0-9af]+\\) \\([0-9]+\\)"
+  "Regular expression complementing the address and value format strings")
+
+
 (defun brainfuck--memory-buffer-name (&optional index)
   "Get a name for a memory buffer"
   (format brainfuck--buffer-memory-name-template (if index index "")))
@@ -68,6 +72,7 @@ that's not used already, returns the buffer"
   "Insert a line with the specified address and value"
   (brainfuck--insert-memory-address address)
   (brainfuck--insert-value value)
+  (beginning-of-line)  
   (setq brainfuck--current-line-cache address)
   (setq brainfuck--current-value-cache value))
 
@@ -87,26 +92,48 @@ that's not used already, returns the buffer"
   (brainfuck--empty-state))
 
 (defun brainfuck--clear-line ()
-  )
+  (delete-region (line-beginning-position)
+                 (line-end-position)))
 
 (defun brainfuck--set (new-value)
-  ;;; TODO
-  )
+  (with-current-buffer brainfuck--memory-buffer
+    (brainfuck--clear-line)
+    (brainfuck--insert-line brainfuck--current-line-cache new-value))
+  (setq brainfuck--current-value-cache new-value))
 
 (defun brainfuck--get ()
-  ;;; TODO
-)
+  brainfuck--current-value-cache)
 
 (defun brainfuck--right ()
-  ;;; TODO
+
   )
 
+(defun brainfuck--parse-line ()  
+  (search-forward-regexp brainfuck--line-regexp (line-end-position) t)  
+  ;;; HIC SUNT LEONES → parse the matches
+  )
+
+(defun brainfuck--update-cache-with-line-content ()
+  (let ((line-content (brainfuck--parse-line)))
+    (setq brainfuck--current-line-cache (nth 0 line-content))
+    (setq brainfuck--current-value-cache (nth 1 line-content))))
+
+(defun brainfuck--previous-line ()
+  (let ((result (forward-line -1)))
+    (if (= -1 result)
+        (error "Negative memory address"))))
+
 (defun brainfuck--left ()
-  ;;; TODO
-)
+  (with-current-buffer brainfuck--memory-buffer
+    (brainfuck--previous-line)
+    (brainfuck--update-cache-with-line-content)))
+
+(defmacro comment (&rest args))
 
 (defun brainfuck--print-memory ()
-  ;;; TODO (probably empty)
-)
+  (comment do nothing)
+  )
+
+(fmakunbound 'comment)
 
 (provide 'brainfuck-buffer-memory)
