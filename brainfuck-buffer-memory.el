@@ -88,7 +88,7 @@ that's not used already, returns the buffer"
     (display-buffer buffer)))
 
 (defun brainfuck--init ()
-  (display-buffer)
+  (display-buffer brainfuck--memory-buffer)
   (brainfuck--empty-state))
 
 (defun brainfuck--clear-line ()
@@ -109,9 +109,12 @@ that's not used already, returns the buffer"
   )
 
 (defun brainfuck--parse-line ()  
-  (search-forward-regexp brainfuck--line-regexp (line-end-position) t)  
-  ;;; HIC SUNT LEONES → parse the matches
-  )
+  (save-excursion
+    (save-match-data
+      (if (search-forward-regexp brainfuck--line-regexp (line-end-position) t)
+          (list (string-to-number (buffer-substring (match-beginning 1) (match-end 1)) 16)
+                (string-to-number (buffer-substring (match-beginning 2) (match-end 2))))
+        (error (concat "invalid line \"" (substring-no-properties (buffer-substring (line-beginning-position) (line-end-position))) "\""))))))
 
 (defun brainfuck--update-cache-with-line-content ()
   (let ((line-content (brainfuck--parse-line)))
