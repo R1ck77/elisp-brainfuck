@@ -65,16 +65,6 @@ that's not used already, returns the buffer"
   "Insert a correctly formatted address with value separator"
   (insert (brainfuck--address-representation address)))
 
-;;; (defun forward-line-create ()
-;;;   (if (not (zerop (forward-line)))
-;;;       (insert "\n")))
-;;; 
-;;; (defun test-next-line ()
-;;;   (forward-line-create)
-;;;   (if (= (line-beginning-position) (line-end-position))
-;;;       (insert "new stuff!")
-;;;     (goto-char (line-end-position))))
-
 (defun brainfuck--value-representation (value)
   "Format an value"
   (format brainfuck--value-format value))
@@ -119,9 +109,21 @@ that's not used already, returns the buffer"
 (defun brainfuck--get ()
   (brainfuck--get-value))
 
-(defun brainfuck--right ()
+;;; (defun forward-line-create ()
+;;;   (if (not (zerop (forward-line)))
+;;;       (insert "\n")))
+;;; 
+;;; (defun test-next-line ()
+;;;   (forward-line-create)
+;;;   (if (= (line-beginning-position) (line-end-position))
+;;;       (insert "new stuff!")
+;;;     (goto-char (line-end-position))))
 
-  )
+(defun brainfuck--right ()
+  (with-current-buffer brainfuck--memory-buffer
+      (if (not (zerop (forward-line)))
+          (insert "\n"))
+      (brainfuck--insert-line (+ 1 (brainfuck--get-line)) 0)))
 
 (defun brainfuck--parse-line ()  
   (save-excursion
