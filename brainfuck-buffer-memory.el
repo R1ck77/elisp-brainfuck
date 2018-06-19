@@ -121,9 +121,13 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--right ()
   (with-current-buffer brainfuck--memory-buffer
-      (if (not (zerop (forward-line)))
-          (insert "\n"))
-      (brainfuck--insert-line (+ 1 (brainfuck--get-line)) 0)))
+    (end-of-line)
+    (if (not (zerop (forward-line)))
+        (progn
+          (insert "\n")
+          (brainfuck--insert-line (+ 1 (brainfuck--get-line)) 0)
+          )
+      (brainfuck--update-cache-with-line-content))))
 
 (defun brainfuck--parse-line ()  
   (save-excursion
@@ -139,6 +143,7 @@ that's not used already, returns the buffer"
     (brainfuck--set-value (nth 1 line-content))))
 
 (defun brainfuck--previous-line ()
+  (beginning-of-line)
   (let ((result (forward-line -1)))
     (if (= -1 result)
         (error "Negative memory address"))))
@@ -146,6 +151,7 @@ that's not used already, returns the buffer"
 (defun brainfuck--left ()
   (with-current-buffer brainfuck--memory-buffer
     (brainfuck--previous-line)
+    (beginning-of-line)
     (brainfuck--update-cache-with-line-content)))
 
 (defmacro comment (&rest args))
