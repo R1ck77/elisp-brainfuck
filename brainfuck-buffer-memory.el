@@ -22,6 +22,16 @@
 (defconst brainfuck--line-regexp "0x\\([0-9af]+\\) \\([0-9]+\\)"
   "Regular expression complementing the address and value format strings")
 
+(defun brainfuck--mark-line ()
+  (with-current-buffer brainfuck--memory-buffer
+    (put-text-property (line-beginning-position) (line-end-position)
+                       'font-lock-face 'bold)))
+
+(defun brainfuck--unmark-line ()
+  (with-current-buffer brainfuck--memory-buffer
+      (remove-text-properties (line-beginning-position) (line-end-position)
+                          '(font-lock-face))))
+
 (defun brainfuck--get-line ()
   (with-current-buffer brainfuck--memory-buffer
     brainfuck--current-line-cache))
@@ -75,9 +85,11 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--insert-line (address value)
   "Insert a line with the specified address and value"
+  (brainfuck--unmark-line)
   (brainfuck--insert-memory-address address)
   (brainfuck--insert-value value)
-  (beginning-of-line)  
+  (beginning-of-line)
+  (brainfuck--mark-line)
   (brainfuck--set-line address)
   (brainfuck--set-value value))
 
@@ -89,6 +101,7 @@ that's not used already, returns the buffer"
   (let ((buffer (brainfuck--create-empty-buffer)))
     (setq brainfuck--memory-buffer buffer)
     (with-current-buffer brainfuck--memory-buffer
+      (font-lock-mode)
       (setq brainfuck--memory-buffer buffer)
       (brainfuck--insert-first-line))    
     (display-buffer brainfuck--memory-buffer)))
@@ -109,25 +122,16 @@ that's not used already, returns the buffer"
 (defun brainfuck--get ()
   (brainfuck--get-value))
 
-;;; (defun forward-line-create ()
-;;;   (if (not (zerop (forward-line)))
-;;;       (insert "\n")))
-;;; 
-;;; (defun test-next-line ()
-;;;   (forward-line-create)
-;;;   (if (= (line-beginning-position) (line-end-position))
-;;;       (insert "new stuff!")
-;;;     (goto-char (line-end-position))))
-
 (defun brainfuck--right ()
+  (brainfuck--unmark-line)
   (with-current-buffer brainfuck--memory-buffer
     (end-of-line)
     (if (not (zerop (forward-line)))
         (progn
           (insert "\n")
-          (brainfuck--insert-line (+ 1 (brainfuck--get-line)) 0)
-          )
-      (brainfuck--update-cache-with-line-content))))
+          (brainfuck--insert-line (+ 1 (brainfuck--get-line)) 0))
+      (brainfuck--update-cache-with-line-content)))
+  (brainfuck--mark-line))
 
 (defun brainfuck--parse-line ()  
   (save-excursion
@@ -150,8 +154,10 @@ that's not used already, returns the buffer"
 
 (defun brainfuck--left ()
   (with-current-buffer brainfuck--memory-buffer
+    (brainfuck--unmark-line)
     (brainfuck--previous-line)
     (beginning-of-line)
+    (brainfuck--mark-line)
     (brainfuck--update-cache-with-line-content)))
 
 (defmacro comment (&rest args))
