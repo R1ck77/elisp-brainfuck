@@ -23,7 +23,7 @@
   "Mark th next char, while cleaning all other highlights"
   (remove-text-properties (point-min) (point-max) '(font-lock-face))
   (let ((here (point)))
-    (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face font-lock-warning-face)))
+    (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face 'bold)))
 
 (defun brainfuck--read-char ()
   (let ((next-char (char-after)))
