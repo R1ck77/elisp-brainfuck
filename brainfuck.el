@@ -26,6 +26,7 @@
     (put-text-property here (min (+ here 1) (point-max)) 'font-lock-face 'bold)))
 
 (defun brainfuck--read-char ()
+  "Read and mark the next character, return nil if none can be found"
   (let ((next-char (char-after)))
     (brainfuck--mark-next)
     (goto-char (+ 1 (point)))
@@ -34,16 +35,22 @@
       nil)))
 
 (defun brainfuck--add (value)
+  "Add value to the current memory cell"
   (brainfuck--set (+ (brainfuck--get)
                      value)))
 
 (defun brainfuck--minus ()
+  "Subtract 1 from the current memory cell"
   (brainfuck--add -1))
 
 (defun brainfuck--plus ()
+  "Add 1 to the current memory cell"
   (brainfuck--add 1))
 
 (defun brainfuck--output ()
+  "Print the current cell value
+
+Use the *Messages* buffer"
   (print (char-to-string (brainfuck--get))))
 
 (defun brainfuck--input ()
