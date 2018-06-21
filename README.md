@@ -28,11 +28,10 @@ Characters that are outside the range `+-><[].,` are ignored, which is neat for 
 
 You can use the command `M-x brainfuck-interpret` to read the program at point and get the status of the memory at the end. 
 
-The , and . operators read from the minibuffer and write to the `*Messages*` buffer.
+The `,` and `.` operators read from the minibuffer and write to the `*Messages*` buffer.
 
 The interpret ignores all invalid characters and reads until the end of the buffer.
 
 ### License
 
 This code is provided "as it is", is unfit for any use or purpose, not covered by any warranty, and is released under the GNU GPL version 3, which I'm pretty sure you can Google yourself.
-
