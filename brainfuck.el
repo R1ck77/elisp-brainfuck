@@ -100,10 +100,9 @@
      (t (progn
           (setq is-valid-char nil))))    
     (if is-valid-char
-      (let ((here (point)))
-        (goto-char (point-min))
-        (sit-for brainfuck-interpret-delay)        
-        (goto-char here)))))
+        (let ((here (point)))
+          (recenter-top-bottom)
+          (sit-for brainfuck-interpret-delay)))))
 
 (defun brainfuck-interpret ()
   "Interpret the code at point with a blank memory state"
