@@ -40,37 +40,46 @@
                      value)))
 
 (defun brainfuck--minus ()
-  "Subtract 1 from the current memory cell"
+  "- operator"
   (brainfuck--add -1))
 
 (defun brainfuck--plus ()
-  "Add 1 to the current memory cell"
+  "+ operator"
   (brainfuck--add 1))
 
 (defun brainfuck--output ()
-  "Print the current cell value
+  ". operator
 
-Use the *Messages* buffer"
+Print the current cell value in the *Messages* buffer"
   (print (char-to-string (brainfuck--get))))
 
 (defun brainfuck--input ()
+  ", operator
+
+Read the value of the current cell from the minibuffer.
+
+The first character of the input is converted to a char and used as a value"
   (brainfuck--set (string-to-char (read-input "value: "))))
 
 (defun brainfuck--read-backward ()
+  "Read the current char, moving backward"
   (backward-char)
   (char-after))
 
 (defun brainfuck--read-forward ()
+  "Read the current char, moving forward"
   (forward-char)
   (char-before))
 
 (defun brainfuck--char-to-score (char)
+  "Used for square bracket balancing: score [ and ] only in a complementary way"
   (cond
    ((= char ?\[) 1)
    ((= char ?\]) -1)
    (t 0)))
 
 (defun brainfuck--backward-until-balanced ()
+  "Move backward in the program until the current ] is balanced"
   (let ((score (brainfuck--char-to-score
                 (brainfuck--read-backward))))
     (while (/= score 0)
@@ -79,6 +88,7 @@ Use the *Messages* buffer"
                              (brainfuck--char-to-score new-char)))))))
 
 (defun brainfuck--forward-until-balanced ()
+  "Move forward in the program until the current [ is balanced"
   (let ((score (brainfuck--char-to-score (char-before))))
     (while (/= score 0)
       (let ((new-char (brainfuck--read-forward)))
@@ -86,10 +96,12 @@ Use the *Messages* buffer"
                        (brainfuck--char-to-score new-char)))))))
 
 (defun brainfuck--cond-forth ()
+  "[ operator"
   (if (zerop (brainfuck--get))
       (brainfuck--forward-until-balanced)))
 
 (defun brainfuck--cond-back ()
+  "] operator"
   (if (not (zerop (brainfuck--get)))
       (brainfuck--backward-until-balanced)))
 
