@@ -2,7 +2,7 @@
 
 A small project to create a brainfuck interpreter for emacs, because "why not?".
 
-This is mostly an exercise to refresh my elisp knowledge so don't expect much from this project.
+This is mostly an exercise to refresh my elisp knowledge so don't expect much from this project: there are at least 2 other brainfuck interpreters in the emacs packages repositories :)
 
 ### Status
 
